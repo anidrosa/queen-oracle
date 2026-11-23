@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Tarot Queens</title>
+<style>
+/*
+VOICE: warm priestess guide, grounded and mystical
+IDEA: a hand-drawn oracle card you pull, then a temple scroll of four teachings
+PICTURE: the flip card with a crown sigil on its back
+COLOUR and TYPE: night indigo, mauve, gold, blush; Cormorant Garamond + Hanken Grotesk
+LAYOUT: header, draw stage, four Queen teachings, keeping instructions, journal, footer
+*/
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; min-width: 0; }
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0716;
+  --bg2: #150e28;
+  --ink: #F6EEFF;
+  --ink-dim: #CDB8E6;
+  --ink-faint: #9580ad;
+  --violet: #A97BE8;
+  --violet-lt: #D2B4F2;
+  --mauve: #D79BC9;
+  --blush: #F4B8C8;
+  --indigo: #5A4FCF;
+  --gold: #F2D49B;
+  --card-surface: rgba(30,18,52,0.72);
+  --card-border: rgba(201,160,240,0.24);
+  --el-fire: #FFC08A;
+  --el-water: #9EDCF2;
+  --el-earth: #A8E3B6;
+  --el-air: #CDBEFF;
+  --serif: 'Cormorant Garamond', 'Hoefler Text', Georgia, serif;
+  --sans: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+html, body { min-height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  position: relative;
+}
+
+.orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; }
+.orb-1 { width: 520px; height: 520px; top: -180px; left: 50%; transform: translateX(-50%);
+  background: radial-gradient(circle, var(--gold) 0%, transparent 68%); opacity: 0.16; }
+.orb-2 { width: 560px; height: 560px; top: 8%; left: -180px;
+  background: radial-gradient(circle, var(--mauve) 0%, transparent 70%); opacity: 0.20; }
+.orb-3 { width: 600px; height: 600px; bottom: -220px; right: -200px;
+  background: radial-gradient(circle, var(--indigo) 0%, transparent 70%); opacity: 0.26; }
+.orb-4 { width: 420px; height: 420px; top: 45%; right: 8%;
+  background: radial-gradient(circle, var(--blush) 0%, transparent 70%); opacity: 0.12; }
+
+#rays { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.ray {
+  position: absolute; top: -30vh; width: 120px; height: 150vh; transform-origin: top center;
+  background: linear-gradient(to bottom, rgba(255,236,210,0.15), rgba(215,155,201,0.06) 45%, transparent 80%);
+  filter: blur(22px); animation: sway 14s ease-in-out infinite;
+}
+.ray:nth-child(1) { left: 38%; transform: rotate(9deg); }
+.ray:nth-child(2) { left: 50%; width: 180px; transform: rotate(-4deg); animation-delay: -5s; opacity: 0.8; }
+.ray:nth-child(3) { left: 62%; width: 90px; transform: rotate(-14deg); animation-delay: -9s; opacity: 0.6; }
+@keyframes sway { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.95; } }
+
+#motes { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.mote {
+  position: absolute; bottom: -12px; width: 3px; height: 3px; border-radius: 50%;
+  box-shadow: 0 0 8px 2px currentColor; opacity: 0; animation: float linear infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0) translateX(0) scale(0.6); opacity: 0; }
+  12% { opacity: 0.9; } 85% { opacity: 0.45; }
+  100% { transform: translateY(-112vh) translateX(var(--drift, 30px)) scale(1); opacity: 0; }
+}
+
+.wrap { position: relative; z-index: 2; max-width: 920px; margin: 0 auto; padding: 3.25rem 1.25rem 4.5rem; }
+
+.brand-label {
+  text-align: center; font-family: var(--mono); font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--violet-lt); margin-bottom: 1rem;
+}
+.title {
+  text-align: center; font-family: var(--serif); font-size: clamp(2.6rem, 7.5vw, 4.25rem);
+  font-weight: 600; line-height: 1.04; letter-spacing: -0.01em; text-wrap: balance;
+  background: linear-gradient(100deg, var(--gold) 0%, var(--blush) 30%, var(--mauve) 52%, var(--violet-lt) 74%, var(--gold) 100%);
+  background-size: 220% auto; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; animation: shimmer 12s linear infinite;
+}
+@keyframes shimmer { to { background-position: 220% center; } }
+.subtitle {
+  text-align: center; font-family: var(--serif); font-style: italic; font-size: 1.28rem;
+  color: var(--ink-dim); margin: 0.9rem auto 0; max-width: 560px; line-height: 1.42;
+}
+
+.controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.45rem; margin: 2.5rem 0 0.5rem; }
+.pill {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-dim); background: rgba(255,255,255,0.025); border: 1px solid var(--card-border);
+  padding: 0.65rem 1.05rem; min-height: 44px; border-radius: 30px; cursor: pointer; transition: all 0.2s ease;
+}
+.pill:hover { color: var(--ink); border-color: var(--violet); }
+.pill.active {
+  color: #1a0b22; background: linear-gradient(100deg, var(--gold), var(--blush) 50%, var(--mauve));
+  border-color: transparent; font-weight: 600;
+}
+
+.stage { display: flex; flex-direction: column; align-items: center; margin-top: 2.5rem; }
+.deck-card { position: relative; width: 340px; max-width: 86vw; aspect-ratio: 5 / 8; perspective: 1500px; cursor: pointer; }
+.flipper { position: relative; width: 100%; height: 100%; transition: transform 0.9s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
+.deck-card.revealed .flipper { transform: rotateY(180deg); }
+.face {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
+}
+.back {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(242,212,155,0.22), transparent 58%),
+    radial-gradient(circle at 20% 80%, rgba(215,155,201,0.20), transparent 60%),
+    radial-gradient(circle at 85% 70%, rgba(90,79,207,0.26), transparent 60%),
+    linear-gradient(165deg, #201234 0%, #0b0716 100%);
+  border: 1px solid rgba(210,180,242,0.38); align-items: center; justify-content: center;
+  box-shadow: 0 26px 70px -22px rgba(0,0,0,0.85), inset 0 0 70px rgba(0,0,0,0.45);
+}
+.back::before { content: ""; position: absolute; inset: 15px; border: 1px solid rgba(210,180,242,0.26); border-radius: 13px; }
+.back-art { width: 160px; height: 160px; }
+.back-art .halo { animation: turn 46s linear infinite; transform-origin: 60px 60px; }
+@keyframes turn { to { transform: rotate(360deg); } }
+.back-word { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.34em; text-transform: uppercase; color: var(--violet-lt); margin-top: 1.3rem; }
+.deck-card:not(.revealed):hover .flipper { transform: translateY(-9px) rotate(-1.2deg); }
+
+.front {
+  transform: rotateY(180deg);
+  background: radial-gradient(circle at 50% 0%, rgba(242,212,155,0.10), transparent 55%), var(--card-surface);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border); box-shadow: 0 26px 70px -22px rgba(0,0,0,0.85);
+  padding: 2.9rem 1.6rem 2.5rem; align-items: center; justify-content: center; text-align: center;
+}
+.front::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--blush), var(--mauve), var(--violet)); }
+.card-el { position: absolute; top: 1.25rem; left: 0; right: 0; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase; }
+.card-num { position: absolute; bottom: 1.1rem; left: 0; right: 0; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; color: var(--ink-faint); }
+.card-glyph { margin-bottom: 0.8rem; }
+.card-name { font-family: var(--serif); font-weight: 600; font-size: 2.05rem; line-height: 1.05; margin-bottom: 0.25rem; }
+.card-title { font-family: var(--serif); font-style: italic; font-size: 1.05rem; color: var(--ink-dim); margin-bottom: 1.1rem; }
+.divider { width: 54px; height: 1px; background: linear-gradient(90deg, transparent, currentColor, transparent); opacity: 0.55; margin: 0 auto 1.1rem; }
+.card-message { font-family: var(--serif); font-size: 1.42rem; line-height: 1.32; color: var(--ink); font-weight: 500; }
+.card-invite {
+  font-family: var(--sans); font-size: 0.86rem; font-style: italic; line-height: 1.5; color: var(--ink-dim);
+  margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid rgba(210,180,242,0.16);
+}
+.card-invite b { display: block; font-family: var(--mono); font-style: normal; font-size: 0.58rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4rem; }
+
+.hint { margin-top: 1.4rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); min-height: 1rem; text-align: center; }
+
+.btn-row { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-top: 1.5rem; }
+.btn {
+  font-family: var(--sans); font-size: 0.86rem; font-weight: 600; letter-spacing: 0.02em;
+  padding: 0.8rem 1.6rem; min-height: 44px; border-radius: 30px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.2s ease;
+}
+.btn-primary { color: #1a0b22; background: linear-gradient(100deg, var(--gold), var(--blush) 50%, var(--mauve)); box-shadow: 0 8px 26px -8px rgba(215,155,201,0.6); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(215,155,201,0.8); }
+.btn-ghost { color: var(--ink-dim); background: transparent; border-color: var(--card-border); }
+.btn-ghost:hover { color: var(--ink); border-color: var(--violet); }
+.btn:focus-visible, .pill:focus-visible, .deck-card:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.section-head { text-align: center; margin: 4.5rem 0 0.5rem; }
+.section-head h2 { font-family: var(--serif); font-size: 2.2rem; font-weight: 600; color: var(--ink); line-height: 1.1; }
+.section-head p { font-family: var(--sans); color: var(--ink-dim); font-size: 0.95rem; margin: 0.5rem auto 0; max-width: 560px; line-height: 1.55; }
+
+/* Queen teachings */
+.queens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; margin-top: 2rem; }
+.queen {
+  position: relative; background: var(--card-surface); border: 1px solid var(--card-border);
+  border-radius: 18px; padding: 1.7rem 1.5rem 1.5rem; overflow: hidden; color: var(--ink);
+}
+.queen::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--c), transparent); }
+.q-top { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.1rem; }
+.q-top svg { flex: none; color: var(--c); }
+.q-suit { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c); }
+.q-name { font-family: var(--serif); font-size: 1.75rem; font-weight: 600; line-height: 1.05; color: var(--c); }
+.q-title { font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--ink-dim); }
+.q-desc { font-family: var(--serif); font-size: 1.15rem; line-height: 1.45; margin-bottom: 1.1rem; }
+.q-sec { padding-top: 0.85rem; margin-top: 0.85rem; border-top: 1px solid rgba(210,180,242,0.14); }
+.q-sec h3 { font-family: var(--mono); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c); margin-bottom: 0.35rem; }
+.q-sec p { font-size: 0.95rem; line-height: 1.6; color: var(--ink); }
+.q-pair { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 1rem; }
+.q-affs { list-style: none; display: grid; gap: 0.45rem; }
+.q-affs li { font-family: var(--serif); font-size: 1.12rem; line-height: 1.35; padding-left: 1.1rem; position: relative; }
+.q-affs li::before { content: "\2726"; position: absolute; left: 0; top: 0.1rem; font-size: 0.7rem; color: var(--c); }
+.q-prompt { font-family: var(--serif); font-style: italic; font-size: 1.12rem; line-height: 1.4; }
+.q-actions { margin-top: 1.2rem; display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.q-written { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+
+/* Save instructions */
+.keep {
+  margin-top: 1.75rem; background: rgba(255,255,255,0.025); border: 1px solid var(--card-border);
+  border-radius: 18px; padding: 1.6rem 1.5rem;
+}
+.keep ol { list-style: none; counter-reset: k; display: grid; gap: 0.9rem; }
+.keep li { counter-increment: k; position: relative; padding-left: 2.4rem; font-size: 0.97rem; line-height: 1.55; }
+.keep li::before {
+  content: counter(k); position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 600;
+  color: #1a0b22; background: linear-gradient(135deg, var(--gold), var(--mauve));
+}
+.keep li b { color: var(--gold); font-weight: 600; }
+.keep .note { margin-top: 1.1rem; font-size: 0.85rem; color: var(--ink-dim); line-height: 1.55; }
+
+/* Add your own */
+.adder { margin-top: 1.75rem; background: rgba(255,255,255,0.018); border: 1px solid var(--card-border); border-radius: 18px; padding: 1.7rem 1.5rem; }
+.adder h3 { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--violet-lt); margin-bottom: 0.3rem; }
+.adder .help { font-size: 0.9rem; color: var(--ink-dim); margin-bottom: 1.2rem; line-height: 1.55; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--violet-lt); margin-bottom: 0.45rem; }
+.field input, .field select, textarea {
+  width: 100%; font-family: var(--sans); font-size: 16px; color: var(--ink); background: rgba(10,6,20,0.7);
+  border: 1px solid var(--card-border); border-radius: 11px; padding: 0.75rem 0.9rem; min-height: 44px;
+}
+.field input:focus, .field select:focus, textarea:focus { outline: none; border-color: var(--gold); }
+.field select option { background: var(--bg2); color: var(--ink); }
+.row2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 1rem; }
+.adder-actions { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-top: 0.4rem; }
+.muted-note { font-size: 0.8rem; color: var(--gold); line-height: 1.5; }
+.mine { margin-top: 1rem; display: grid; gap: 0.5rem; }
+.mine div { font-family: var(--serif); font-size: 1.05rem; padding: 0.55rem 0.8rem; border: 1px dashed var(--card-border); border-radius: 10px; }
+.mine span { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; margin-right: 0.5rem; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 50; background: rgba(6,3,12,0.8);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  display: flex; align-items: center; justify-content: center; padding: 1.2rem;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(165deg, #201234 0%, #0d0819 100%); border: 1px solid var(--card-border);
+  border-radius: 20px; padding: 2rem 1.6rem; position: relative;
+  transform: translateY(14px) scale(0.98); transition: transform 0.25s ease; box-shadow: 0 30px 90px -20px rgba(0,0,0,0.9);
+}
+.modal-overlay.open .modal { transform: none; }
+.modal-close { position: absolute; top: 0.6rem; right: 0.8rem; width: 44px; height: 44px; background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 1.6rem; }
+.modal-close:hover { color: var(--ink); }
+.modal-eyebrow { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--violet-lt); margin-bottom: 0.9rem; }
+.modal-card { border-left: 3px solid currentColor; padding: 0.1rem 0 0.1rem 1rem; margin-bottom: 1.3rem; }
+.mc-name { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; line-height: 1.1; }
+.mc-title { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--ink-dim); margin-bottom: 0.6rem; }
+.mc-text { font-family: var(--serif); font-size: 1.22rem; line-height: 1.32; color: var(--ink); font-weight: 500; }
+.mc-invite { font-size: 0.9rem; font-style: italic; color: var(--ink-dim); margin-top: 0.6rem; line-height: 1.5; }
+.modal textarea { min-height: 150px; line-height: 1.55; resize: vertical; }
+.modal-actions { display: flex; gap: 0.8rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+.modal-note { font-size: 0.8rem; color: var(--gold); }
+
+.entry-del {
+  background: none; border: 1px solid var(--card-border); color: var(--ink-faint); border-radius: 8px;
+  font-size: 0.6rem; font-family: var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.45rem 0.7rem; cursor: pointer; transition: all 0.2s ease;
+}
+.entry-del:hover { color: var(--blush); border-color: var(--blush); }
+.past { margin-top: 1.6rem; }
+.past h4 { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.8rem; }
+.past-entry { background: rgba(255,255,255,0.025); border: 1px solid var(--card-border); border-radius: 11px; padding: 0.85rem 0.95rem; margin-bottom: 0.6rem; position: relative; }
+.past-entry p { font-size: 0.92rem; line-height: 1.55; white-space: pre-wrap; padding-right: 4.5rem; }
+.pe-date, .j-date { font-family: var(--mono); font-size: 0.58rem; color: var(--ink-faint); margin-top: 0.5rem; letter-spacing: 0.1em; }
+.past-entry .entry-del { position: absolute; top: 0.6rem; right: 0.6rem; }
+
+.journal-empty { text-align: center; color: var(--ink-dim); font-size: 0.95rem; line-height: 1.6; padding: 2rem 1rem; max-width: 420px; margin: 1.5rem auto 0; }
+.journal-actions { display: flex; justify-content: center; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.3rem; }
+.journal-list { margin-top: 1.4rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.j-entry { background: var(--card-surface); border: 1px solid var(--card-border); border-radius: 15px; padding: 1.3rem 1.3rem; position: relative; }
+.j-el { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; display: block; margin-bottom: 0.3rem; }
+.j-card { font-family: var(--serif); font-size: 1.18rem; margin-bottom: 0.6rem; padding-right: 5rem; }
+.j-body { font-size: 0.97rem; line-height: 1.6; white-space: pre-wrap; }
+.j-entry .entry-del { position: absolute; top: 1rem; right: 1rem; }
+#copyFallback { display: none; margin-top: 1rem; min-height: 180px; font-size: 14px; }
+
+.footer { text-align: center; margin-top: 4rem; font-family: var(--serif); font-size: 1.15rem; color: var(--ink-dim); }
+.footer a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(242,212,155,0.45); padding-bottom: 1px; transition: color 0.2s ease, border-color 0.2s ease; }
+.footer a:hover { color: var(--blush); border-color: var(--blush); }
+
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 60; background: rgba(6,3,12,0.82);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+}
+.confirm-box { width: 100%; max-width: 370px; background: linear-gradient(165deg, #201234 0%, #0d0819 100%); border: 1px solid var(--card-border); border-radius: 18px; padding: 2rem 1.6rem; text-align: center; }
+.confirm-box p { font-size: 0.98rem; line-height: 1.5; margin-bottom: 1.4rem; }
+.confirm-btns { display: flex; gap: 0.75rem; justify-content: center; }
+
+@media (max-width: 720px) {
+  .queens { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 560px) {
+  .row2, .q-pair { grid-template-columns: minmax(0,1fr); }
+  .card-message { font-size: 1.26rem; }
+  .card-name { font-size: 1.8rem; }
+  .front { padding: 2.7rem 1.25rem 2.4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mote, .ray, .title, .back-art .halo { animation: none; }
+  .flipper { transition-duration: 0.01ms; }
+}
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div><div class="orb orb-4"></div>
+<div id="rays"><div class="ray"></div><div class="ray"></div><div class="ray"></div></div>
+<div id="motes"></div>
+
+<div class="wrap">
+  <div class="brand-label">Divine Expression &nbsp;&#8226;&nbsp; Queen Archetype Oracle</div>
+  <h1 class="title">The Tarot Queens</h1>
+  <p class="subtitle">Four Queens, four elements, four ways of holding your power. Pull a card when you want to remember which Queen is rising in you.</p>
+
+  <div class="controls" id="filters">
+    <button class="pill active" data-filter="all">All four Queens</button>
+    <button class="pill" data-filter="Fire">Wands &middot; Fire</button>
+    <button class="pill" data-filter="Water">Cups &middot; Water</button>
+    <button class="pill" data-filter="Air">Swords &middot; Air</button>
+    <button class="pill" data-filter="Earth">Pentacles &middot; Earth</button>
+  </div>
+
+  <div class="stage">
+    <div class="deck-card" id="deckCard" tabindex="0" role="button" aria-label="Draw a card">
+      <div class="flipper">
+        <div class="face back">
+          <svg class="back-art" viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#FFF6E4"/>
+                <stop offset="45%" stop-color="#F2D49B" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#D79BC9" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="haloGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#F2D49B"/>
+                <stop offset="50%" stop-color="#D2B4F2"/>
+                <stop offset="100%" stop-color="#F4B8C8"/>
+              </linearGradient>
+            </defs>
+            <g class="halo" stroke="url(#haloGrad)" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.85">
+              <circle cx="60" cy="60" r="50" stroke-dasharray="1 5"/>
+              <g id="ray4">
+                <line x1="60" y1="6" x2="60" y2="20"/><line x1="60" y1="100" x2="60" y2="114"/>
+                <line x1="6" y1="60" x2="20" y2="60"/><line x1="100" y1="60" x2="114" y2="60"/>
+              </g>
+              <use href="#ray4" transform="rotate(45 60 60)"/>
+            </g>
+            <circle cx="60" cy="60" r="36" fill="url(#coreGlow)"/>
+            <path d="M40 72 L42 50 L51 60 L60 44 L69 60 L78 50 L80 72 Z" fill="#FFF6E4" opacity="0.95"/>
+            <rect x="40" y="74" width="40" height="4" rx="1.5" fill="#FFF6E4" opacity="0.95"/>
+            <circle cx="42" cy="48" r="2.2" fill="#F4B8C8"/><circle cx="60" cy="41.5" r="2.6" fill="#F2D49B"/><circle cx="78" cy="48" r="2.2" fill="#F4B8C8"/>
+          </svg>
+          <div class="back-word">Draw a Queen</div>
+        </div>
+        <div class="face front" id="cardFront"></div>
+      </div>
+    </div>
+    <div class="hint" id="hint">Tap the card to draw</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="drawBtn">Draw a card</button>
+      <button class="btn btn-ghost" id="reflectBtn" style="display:none;">Write with her</button>
+      <button class="btn btn-ghost" id="teachBtn" style="display:none;">Read her teaching</button>
+      <button class="btn btn-ghost" id="journalBtn">My journal</button>
+    </div>
+  </div>
+
+  <div class="section-head" id="teachings">
+    <h2>Meet the Four Queens</h2>
+    <p>Each Queen carries a gift and a shadow. You hold all four. Notice which one feels like home and which one you have been keeping at a distance.</p>
+  </div>
+  <div class="queens" id="queens"></div>
+
+  <div class="section-head">
+    <h2>How to keep this</h2>
+    <p>A few simple ways to come back to your Queens and keep what you write.</p>
+  </div>
+  <div class="keep">
+    <ol>
+      <li><b>Save the link.</b> Bookmark this page or add it to your phone's home screen so you can return to it whenever you need a Queen's guidance.</li>
+      <li><b>Your journal saves itself.</b> When you write with a Queen and tap "Save to journal," your words stay in this browser on this device, ready for next time.</li>
+      <li><b>Keep a copy you own.</b> Open "My journal" and tap "Copy my journal," then paste it into your notes app, GoodNotes, or a document.</li>
+      <li><b>Save a card.</b> After you draw, take a screenshot of the card. It makes a lovely phone wallpaper or a reminder for your altar.</li>
+    </ol>
+    <p class="note">Your entries live in this browser only. They won't follow you to another phone or browser, and clearing your browser data will erase them, so copy anything you want to keep.</p>
+  </div>
+
+  <div class="adder">
+    <h3>Add your own affirmation</h3>
+    <p class="help">Write the words a Queen speaks to you. Your affirmation is shuffled into the deck with hers and saved in this browser.</p>
+    <div class="row2">
+      <div class="field">
+        <label for="queenField">Queen</label>
+        <select id="queenField">
+          <option value="0">Queen of Wands</option>
+          <option value="1">Queen of Cups</option>
+          <option value="2">Queen of Swords</option>
+          <option value="3">Queen of Pentacles</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="affInput">Your affirmation</label>
+        <input type="text" id="affInput" placeholder="I trust the warmth I bring into every room." maxlength="160">
+      </div>
+    </div>
+    <div class="adder-actions">
+      <button class="btn btn-primary" id="addBtn">Add to deck</button>
+      <button class="btn btn-ghost" id="clearMineBtn">Remove mine</button>
+      <span class="muted-note" id="addNote"></span>
+    </div>
+    <div class="mine" id="mineList"></div>
+  </div>
+
+  <div id="journalSection" style="display:none;">
+    <div class="section-head">
+      <h2>My Queen Journal</h2>
+      <p id="journalCount"></p>
+    </div>
+    <div class="journal-actions" id="journalActions" style="display:none;">
+      <button class="btn btn-ghost" id="exportBtn">Copy my journal</button>
+      <span class="muted-note" id="copyNote"></span>
+    </div>
+    <textarea id="copyFallback" readonly aria-label="Your journal text"></textarea>
+    <div id="journalList"></div>
+  </div>
+
+  <div class="footer"><a href="https://linktr.ee/spirit_guidess" target="_blank" rel="noopener">Divine Expression</a></div>
+</div>
+
+<div class="modal-overlay" id="reflectModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Write with this Queen">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-eyebrow">Write with her</div>
+    <div class="modal-card" id="modalCard"></div>
+    <textarea id="reflectInput" placeholder="Write what comes up. No one sees this but you." maxlength="4000"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveReflectBtn">Save to journal</button>
+      <span class="modal-note" id="modalNote"></span>
+    </div>
+    <div class="past" id="modalPast"></div>
+  </div>
+</div>
+
+<script>
+{
+/* ============================================================
+   THE QUEENS. Edit any text below to make it your own.
+   ============================================================ */
+const QUEENS = [
+  { name: "Queen of Wands", suit: "Wands", element: "Fire", title: "The Radiant Flame",
+    description: "She walks into a room and the warmth changes. The Queen of Wands knows what lights her up and builds her life around it. Her confidence doesn't come from being liked. It comes from being honest about what she wants and moving toward it with an open heart.",
+    force: "Fire is the spark of will, desire, and creative life force. It asks you to act on what you feel instead of waiting for permission. Fire warms and inspires, and when it isn't tended, it burns through you.",
+    manifestation: "When she appears in a reading, it is time to be seen. Say yes to the visible role, share your work, lead the circle. Reversed or blocked, she can point to burnout, comparison, or a woman who has been dimming herself so others stay comfortable.",
+    gift: "Magnetism, courage, and a joy that gives other women permission to shine too. She inspires by example rather than persuasion.",
+    shadow: "Jealousy, a quick temper, or needing the spotlight to feel worthy. Or the quieter shadow: holding back her fire because it once made someone uncomfortable.",
+    affirmations: [
+      "My light is not too much. It is exactly what I came here to share.",
+      "I follow what sets me alight and trust it to lead me home to myself.",
+      "I can be warm and powerful in the same breath."
+    ],
+    prompt: "Where in my life have I been turning my flame down? What would one small, visible step look like this week?" },
+
+  { name: "Queen of Cups", suit: "Cups", element: "Water", title: "The Intuitive Heart",
+    description: "She feels everything, and she lets herself. The Queen of Cups listens beneath the words to what is really moving. Her strength is a softness that doesn't collapse. She can hold someone's grief without making it her own.",
+    force: "Water is emotion, intuition, dreams, and the unseen currents that connect us. It teaches you to flow, to feel, and to trust the knowing that arrives before the reasons do.",
+    manifestation: "In a reading, she invites you to trust your intuition and lead with compassion, including toward yourself. Reversed or blocked, she can signal emotional overwhelm, caretaking until you're empty, or ignoring an inner nudge you already felt.",
+    gift: "Deep empathy, intuitive sensitivity, and a presence that makes others feel safe enough to be honest.",
+    shadow: "Absorbing everyone's feelings as her own, losing herself in other people's needs, or drifting into fantasy so she doesn't have to face what is real.",
+    affirmations: [
+      "My sensitivity is a form of wisdom, and I honor it.",
+      "I can hold space for others without pouring myself out.",
+      "I trust the quiet knowing that rises in me."
+    ],
+    prompt: "Whose feelings have I been carrying that aren't mine to hold? What does my own heart need from me right now?" },
+
+  { name: "Queen of Swords", suit: "Swords", element: "Air", title: "The Clear-Sighted",
+    description: "She has lived through things, and she came out with clarity instead of bitterness. The Queen of Swords sees through pretense, says what is true, and keeps her boundaries without apology. Her kindness is honest, and her honesty is kind.",
+    force: "Air is thought, truth, communication, and discernment. It cuts through confusion and clears the space so you can see what is actually in front of you.",
+    manifestation: "When she shows up, it is time to speak plainly, make the clear decision, or set the boundary you've been circling. Reversed or blocked, she can point to harsh self-talk, coldness worn as armor, or words held back that need to be said.",
+    gift: "Discernment, honest communication, and the strength to choose herself after loss or disappointment.",
+    shadow: "Bitterness, sharp judgment, and walls built so high that love can't reach her. She can confuse being closed off with being safe.",
+    affirmations: [
+      "I speak my truth clearly and with care.",
+      "My boundaries are an act of self-respect.",
+      "I let what I've lived through make me wise, not hard."
+    ],
+    prompt: "What truth have I been softening, avoiding, or explaining away? What would I say if I trusted myself fully?" },
+
+  { name: "Queen of Pentacles", suit: "Pentacles", element: "Earth", title: "The Abundant Keeper",
+    description: "She makes things grow: gardens, homes, businesses, people. The Queen of Pentacles brings magic down to earth through steady care and practical choices. She knows that tending her own body and resources is what allows her to keep giving.",
+    force: "Earth is the body, the home, money, nature, and the slow, patient work of building something real. It teaches you that the sacred lives in daily tending.",
+    manifestation: "In a reading, she asks you to care for the practical side of your life: your body, your money, your space. Abundance grows where your attention goes. Reversed or blocked, she can point to overgiving, neglecting your own needs, or worry about never having enough.",
+    gift: "A nurturing presence, resourcefulness, and the ability to create comfort and stability for herself and the people she loves.",
+    shadow: "Tying her worth to how useful she is, smothering instead of supporting, or holding on to security so tightly that she stops receiving.",
+    affirmations: [
+      "I am allowed to receive as fully as I give.",
+      "Caring for my body and my resources is sacred work.",
+      "Abundance grows where I place my loving attention."
+    ],
+    prompt: "Where am I giving from an empty place? What is one practical way I can tend to myself this week?" }
+];
+
+const EL_COLOR = { Fire: "var(--el-fire)", Water: "var(--el-water)", Earth: "var(--el-earth)", Air: "var(--el-air)" };
+const MINE_KEY = "tarotQueensMine:v1";
+const JOURNAL_KEY = "tarotQueensJournal:v1";
+
+function load(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : []; } catch (e) { return []; } }
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+let mine = load(MINE_KEY);
+let journal = load(JOURNAL_KEY);
+
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function formatDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + "  ·  " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+
+function glyph(el, s) {
+  const shapes = {
+    Fire: '<path d="M16 4 L28 26 L4 26 Z"/>',
+    Water: '<path d="M16 28 L4 6 L28 6 Z"/>',
+    Air: '<path d="M16 4 L28 26 L4 26 Z"/><path d="M9 18 H23"/>',
+    Earth: '<path d="M16 28 L4 6 L28 6 Z"/><path d="M9 15 H23"/>'
+  };
+  return '<svg viewBox="0 0 32 32" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">' + shapes[el] + '</svg>';
+}
+
+/* Each draw is one Queen with one affirmation */
+function pool() {
+  const out = [];
+  QUEENS.forEach((q, qi) => q.affirmations.forEach(a => out.push({ qi, text: a })));
+  mine.forEach(m => out.push({ qi: m.qi, text: m.text, mine: true }));
+  return out;
+}
+
+let activeFilter = "all";
+let lastText = "";
+let current = null;
+
+const deckCard = document.getElementById("deckCard");
+const cardFront = document.getElementById("cardFront");
+const hint = document.getElementById("hint");
+const drawBtn = document.getElementById("drawBtn");
+const reflectBtn = document.getElementById("reflectBtn");
+const teachBtn = document.getElementById("teachBtn");
+
+function renderFront(pick, idx, total) {
+  const q = QUEENS[pick.qi], c = EL_COLOR[q.element];
+  cardFront.innerHTML =
+    '<div class="card-el" style="color:' + c + '">' + q.element + ' &middot; ' + q.suit + '</div>' +
+    '<div class="card-glyph" style="color:' + c + '">' + glyph(q.element, 32) + '</div>' +
+    '<div class="card-name" style="color:' + c + '">' + esc(q.name) + '</div>' +
+    '<div class="card-title">' + esc(q.title) + '</div>' +
+    '<div class="divider" style="color:' + c + '"></div>' +
+    '<div class="card-message">' + esc(pick.text) + '</div>' +
+    '<div class="card-invite"><b style="color:' + c + '">Journal with her</b>' + esc(q.prompt) + '</div>' +
+    '<div class="card-num">No. ' + String(idx + 1).padStart(2, "0") + ' / ' + total + (pick.mine ? ' &middot; yours' : '') + '</div>';
+}
+
+function draw() {
+  const all = pool();
+  const list = all.map((p, i) => ({ p, i })).filter(o => activeFilter === "all" || QUEENS[o.p.qi].element === activeFilter);
+  if (!list.length) return;
+  let pick;
+  do { pick = list[Math.floor(Math.random() * list.length)]; } while (list.length > 1 && pick.p.text === lastText);
+  lastText = pick.p.text;
+  current = pick.p;
+  if (deckCard.classList.contains("revealed")) {
+    deckCard.classList.remove("revealed");
+    setTimeout(() => { renderFront(pick.p, pick.i, all.length); deckCard.classList.add("revealed"); }, 300);
+  } else {
+    renderFront(pick.p, pick.i, all.length);
+    deckCard.classList.add("revealed");
+  }
+  hint.textContent = "Draw again for another";
+  drawBtn.textContent = "Draw again";
+  reflectBtn.style.display = "inline-block";
+  teachBtn.style.display = "inline-block";
+}
+deckCard.addEventListener("click", draw);
+deckCard.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); draw(); } });
+drawBtn.addEventListener("click", draw);
+reflectBtn.addEventListener("click", () => { if (current) openReflect(current.qi, current.text); });
+teachBtn.addEventListener("click", () => {
+  if (!current) return;
+  const el = document.getElementById("queen-" + current.qi);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest(".pill"); if (!b) return;
+  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  b.classList.add("active");
+  activeFilter = b.dataset.filter;
+  lastText = "";
+});
+
+/* ---------- Teachings ---------- */
+const queensEl = document.getElementById("queens");
+function renderQueens() {
+  queensEl.innerHTML = QUEENS.map((q, i) => {
+    const n = journal.filter(j => j.qi === i).length;
+    return '<article class="queen" id="queen-' + i + '" style="--c:' + EL_COLOR[q.element] + '">' +
+      '<div class="q-top">' + glyph(q.element, 38) + '<div><div class="q-suit">' + q.suit + ' &middot; ' + q.element + '</div>' +
+      '<div class="q-name">' + esc(q.name) + '</div><div class="q-title">' + esc(q.title) + '</div></div></div>' +
+      '<p class="q-desc">' + esc(q.description) + '</p>' +
+      '<div class="q-sec"><h3>Elemental force</h3><p>' + esc(q.force) + '</p></div>' +
+      '<div class="q-sec"><h3>In a reading</h3><p>' + esc(q.manifestation) + '</p></div>' +
+      '<div class="q-sec q-pair"><div><h3>Her gift</h3><p>' + esc(q.gift) + '</p></div><div><h3>Her shadow</h3><p>' + esc(q.shadow) + '</p></div></div>' +
+      '<div class="q-sec"><h3>Affirmations</h3><ul class="q-affs">' + q.affirmations.map(a => '<li>' + esc(a) + '</li>').join("") + '</ul></div>' +
+      '<div class="q-sec"><h3>Journaling prompt</h3><p class="q-prompt">' + esc(q.prompt) + '</p></div>' +
+      '<div class="q-actions"><button class="btn btn-ghost" data-write="' + i + '">Write with her</button>' +
+      (n ? '<span class="q-written">&#10022; ' + n + (n === 1 ? ' entry' : ' entries') + '</span>' : '') + '</div>' +
+      '</article>';
+  }).join("");
+}
+queensEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-write]"); if (!b) return;
+  const i = +b.dataset.write;
+  openReflect(i, QUEENS[i].affirmations[0]);
+});
+
+/* ---------- Confirm ---------- */
+function safeConfirm(message) {
+  return new Promise(resolve => {
+    const o = document.createElement("div");
+    o.className = "confirm-overlay";
+    o.innerHTML = '<div class="confirm-box"><p></p><div class="confirm-btns"><button class="btn btn-primary">Yes, do it</button><button class="btn btn-ghost">Cancel</button></div></div>';
+    o.querySelector("p").textContent = message;
+    const [yes, no] = o.querySelectorAll("button");
+    const done = r => { o.remove(); resolve(r); };
+    yes.addEventListener("click", () => done(true));
+    no.addEventListener("click", () => done(false));
+    o.addEventListener("click", e => { if (e.target === o) done(false); });
+    document.body.appendChild(o);
+  });
+}
+
+/* ---------- Add your own ---------- */
+const affInput = document.getElementById("affInput");
+const queenField = document.getElementById("queenField");
+const addNote = document.getElementById("addNote");
+const mineList = document.getElementById("mineList");
+let flashTimer;
+function flash(msg) { addNote.textContent = msg; clearTimeout(flashTimer); flashTimer = setTimeout(() => { addNote.textContent = ""; }, 3400); }
+function renderMine() {
+  mineList.innerHTML = mine.map(m => {
+    const q = QUEENS[m.qi];
+    return '<div><span style="color:' + EL_COLOR[q.element] + '">' + q.suit + '</span>' + esc(m.text) + '</div>';
+  }).join("");
+}
+document.getElementById("addBtn").addEventListener("click", () => {
+  const text = affInput.value.trim();
+  if (!text) { flash("Write your affirmation first."); return; }
+  mine.push({ qi: +queenField.value, text });
+  save(MINE_KEY, mine);
+  affInput.value = "";
+  renderMine();
+  flash("Added to the " + QUEENS[+queenField.value].name + " cards.");
+});
+document.getElementById("clearMineBtn").addEventListener("click", async () => {
+  if (!mine.length) { flash("You haven't added any yet."); return; }
+  if (!await safeConfirm("Remove the affirmations you added? The Queens' own words stay.")) return;
+  mine = []; save(MINE_KEY, mine); renderMine(); lastText = "";
+  flash("Your affirmations were removed.");
+});
+
+/* ---------- Journal ---------- */
+const journalBtn = document.getElementById("journalBtn");
+const journalSection = document.getElementById("journalSection");
+const journalList = document.getElementById("journalList");
+const reflectModal = document.getElementById("reflectModal");
+const modalCardEl = document.getElementById("modalCard");
+const reflectInput = document.getElementById("reflectInput");
+const modalNote = document.getElementById("modalNote");
+const modalPast = document.getElementById("modalPast");
+let modalQi = null, modalText = "";
+
+function openReflect(qi, text) {
+  modalQi = qi; modalText = text;
+  const q = QUEENS[qi];
+  modalCardEl.style.color = EL_COLOR[q.element];
+  modalCardEl.innerHTML = '<div class="mc-name">' + esc(q.name) + '</div><div class="mc-title">' + esc(q.title) + '</div>' +
+    '<div class="mc-text">' + esc(text) + '</div><div class="mc-invite">' + esc(q.prompt) + '</div>';
+  reflectInput.value = ""; modalNote.textContent = "";
+  renderModalPast();
+  reflectModal.classList.add("open");
+  setTimeout(() => reflectInput.focus(), 80);
+}
+function closeModal() { reflectModal.classList.remove("open"); modalQi = null; }
+function renderModalPast() {
+  const list = journal.filter(e => e.qi === modalQi).sort((a, b) => b.ts - a.ts);
+  modalPast.innerHTML = list.length ? '<h4>What you have written with her before</h4>' + list.map(e =>
+    '<div class="past-entry"><button class="entry-del" data-id="' + e.id + '">Delete</button><p>' + esc(e.body) + '</p><div class="pe-date">' + formatDate(e.ts) + '</div></div>'
+  ).join("") : "";
+}
+document.getElementById("modalClose").addEventListener("click", closeModal);
+reflectModal.addEventListener("click", e => { if (e.target === reflectModal) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && reflectModal.classList.contains("open")) closeModal(); });
+
+function refreshAll() {
+  journalBtn.textContent = journal.length ? "My journal (" + journal.length + ")" : "My journal";
+  renderQueens();
+  if (journalSection.style.display !== "none") renderJournal();
+}
+
+document.getElementById("saveReflectBtn").addEventListener("click", () => {
+  const body = reflectInput.value.trim();
+  if (!body) { modalNote.textContent = "Write something first."; return; }
+  journal.push({ id: uid(), qi: modalQi, affirmation: modalText, body, ts: Date.now() });
+  save(JOURNAL_KEY, journal);
+  reflectInput.value = "";
+  modalNote.textContent = "Saved to your journal.";
+  renderModalPast(); refreshAll();
+});
+
+async function del(id) {
+  if (!await safeConfirm("Delete this journal entry?")) return false;
+  journal = journal.filter(e => e.id !== id); save(JOURNAL_KEY, journal); return true;
+}
+modalPast.addEventListener("click", async e => {
+  const b = e.target.closest(".entry-del"); if (!b) return;
+  if (await del(b.dataset.id)) { renderModalPast(); refreshAll(); }
+});
+journalList.addEventListener("click", async e => {
+  const b = e.target.closest(".entry-del"); if (!b) return;
+  if (await del(b.dataset.id)) refreshAll();
+});
+
+function renderJournal() {
+  const j = journal.slice().sort((a, b) => b.ts - a.ts);
+  document.getElementById("journalCount").textContent = j.length ? j.length + (j.length === 1 ? " entry saved" : " entries saved") : "";
+  document.getElementById("journalActions").style.display = j.length ? "flex" : "none";
+  if (!j.length) {
+    journalList.innerHTML = '<div class="journal-empty">Nothing here yet. Draw a card or choose a Queen above, then write what comes up. It saves here, just for you.</div>';
+    return;
+  }
+  journalList.innerHTML = '<div class="journal-list">' + j.map(e => {
+    const q = QUEENS[e.qi] || QUEENS[0], c = EL_COLOR[q.element];
+    return '<div class="j-entry"><button class="entry-del" data-id="' + e.id + '">Delete</button>' +
+      '<div class="j-card" style="color:' + c + '"><span class="j-el">' + q.suit + ' &middot; ' + q.element + '</span>' + esc(q.name) + '</div>' +
+      '<div class="j-body">' + esc(e.body) + '</div><div class="j-date">' + formatDate(e.ts) + '</div></div>';
+  }).join("") + '</div>';
+}
+
+function journalText() {
+  const j = journal.slice().sort((a, b) => b.ts - a.ts);
+  const line = "------------------------------------------------------------";
+  let out = "The Tarot Queens · My Queen Journal\nCopied " + formatDate(Date.now()) + "\n" + line + "\n\n";
+  out += j.map(e => {
+    const q = QUEENS[e.qi] || QUEENS[0];
+    return formatDate(e.ts) + "\n" + q.name + ", " + q.title + "  (" + q.element + ")\n" +
+      "Affirmation: " + (e.affirmation || "") + "\nPrompt: " + q.prompt + "\n\n" + e.body + "\n";
+  }).join("\n" + line + "\n\n");
+  return out + "\n\n" + line + "\nDivine Expression\nhttps://linktr.ee/spirit_guidess\n";
+}
+document.getElementById("exportBtn").addEventListener("click", async () => {
+  const text = journalText();
+  const note = document.getElementById("copyNote");
+  const fb = document.getElementById("copyFallback");
+  try {
+    await navigator.clipboard.writeText(text);
+    note.textContent = "Copied. Paste it into your notes to keep it.";
+    fb.style.display = "none";
+  } catch (err) {
+    fb.value = text; fb.style.display = "block"; fb.focus(); fb.select();
+    note.textContent = "Select all the text below and copy it.";
+  }
+});
+
+journalBtn.addEventListener("click", () => {
+  if (journalSection.style.display !== "none") { journalSection.style.display = "none"; return; }
+  renderJournal();
+  journalSection.style.display = "block";
+  journalSection.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+/* ---------- Motes ---------- */
+const host = document.getElementById("motes");
+const colors = ["var(--gold)", "var(--blush)", "var(--violet-lt)", "var(--mauve)", "var(--el-water)"];
+for (let i = 0; i < 34; i++) {
+  const m = document.createElement("div");
+  m.className = "mote";
+  m.style.left = Math.random() * 100 + "vw";
+  const dur = 11 + Math.random() * 14;
+  m.style.animationDuration = dur + "s";
+  m.style.animationDelay = (-Math.random() * dur) + "s";
+  m.style.setProperty("--drift", (Math.random() * 110 - 55) + "px");
+  const s = 2 + Math.random() * 2.5;
+  m.style.width = s + "px"; m.style.height = s + "px";
+  m.style.color = colors[Math.floor(Math.random() * colors.length)];
+  m.style.background = m.style.color;
+  host.appendChild(m);
+}
+
+renderMine();
+refreshAll();
+}
+</script>
+</body>
+</html>
